@@ -178,6 +178,10 @@ ExecStart=$APP_DIR/$APP_NAME
 Restart=always
 RestartSec=5
 EnvironmentFile=$APP_DIR/.env
+# log ออก stdout → journald เก็บ/หมุนให้ (journalctl -u $SERVICE_NAME -f)
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=$SERVICE_NAME
 
 [Install]
 WantedBy=multi-user.target

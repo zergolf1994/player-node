@@ -235,6 +235,13 @@ func resolveEmbedData(ctx context.Context, slug string) (*embedLookup, *EmbedRes
 	return &lk, nil
 }
 
+// overrideBool ทับค่าเดิมเฉพาะเมื่อมีการตั้งค่ามาจริง (ไม่ใช่ nil)
+func overrideBool(dst *bool, v *bool) {
+	if v != nil {
+		*dst = *v
+	}
+}
+
 func (h *Handler) resolveEmbed(r *http.Request, slug string) (*EmbedResolveResult, *EmbedResolveError) {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
@@ -262,9 +269,14 @@ func (h *Handler) resolveEmbed(r *http.Request, slug string) (*EmbedResolveResul
 		return nil, &EmbedResolveError{Status: http.StatusNotFound, Message: "File not found"}
 	}
 
+	// workspace ที่ถูกปิด/ลบ ห้ามเล่น
+	// ⚠ ของเดิมเทียบกับ "error" ซึ่งไม่มีใน WorkspaceStatus (pending/active/
+	// inactive/deleted) เงื่อนไขจึงไม่เคยเป็นจริง = ไม่ได้กันอะไรเลย
 	if file.SpaceID != nil && *file.SpaceID != "" {
 		space := services.FindSpace(*file.SpaceID)
-		if space != nil && space.Status == "error" {
+		if space != nil &&
+			(space.Status == enums.WorkspaceStatusInactive ||
+				space.Status == enums.WorkspaceStatusDeleted) {
 			return nil, &EmbedResolveError{Status: http.StatusNotFound, Message: "This content is currently unavailable"}
 		}
 	}
@@ -309,26 +321,53 @@ func (h *Handler) resolveEmbed(r *http.Request, slug string) (*EmbedResolveResul
 		}
 	}
 
-	baseColor := "#ff6700"
-	autostart := false
-	mute := false
-	continuePlay := true
-	continuePlayArk := false
+	// เริ่มจากค่ากลางของระบบ แล้วให้ตั้งค่าของโดเมน (ถ้ามี) ทับเป็นรายตัว
+	settings := services.GetPlayerSettings()
+
+	baseColor := settings.BaseColor
+	bgColor := settings.BgColor
+	autostart := settings.AutoPlay
+	mute := settings.MuteSound
+	continuePlay := settings.ContinuePlay
+	continuePlayArk := settings.ContinuePlayArk
+	loop := settings.RepeatVideo
+	playbackRate := settings.PlaybackRate
+	pip := settings.PIP
+	displayTitle := settings.DisplayTitle
+	seekForward := settings.FastForward
+	seekBackward := settings.Rewind
+	seekStep := settings.SeekStep
+
 	if domain != nil && domain.Player != nil {
-		if domain.Player.BaseColor != "" {
-			baseColor = domain.Player.BaseColor
+		p := domain.Player
+		if p.BaseColor != "" {
+			baseColor = p.BaseColor
 		}
-		autostart = domain.Player.AutoPlay
-		mute = domain.Player.MuteSound
-		continuePlay = domain.Player.ContinuePlay
-		continuePlayArk = domain.Player.ContinuePlayArk
-	} else {
-		globalSettings := services.GetPlayerSettings()
-		baseColor = globalSettings.BaseColor
-		autostart = globalSettings.AutoPlay
-		mute = globalSettings.MuteSound
-		continuePlay = globalSettings.ContinuePlay
-		continuePlayArk = globalSettings.ContinuePlayArk
+		// ทับเฉพาะตัวที่โดเมนตั้งมาจริง (ไม่ใช่ nil) — ตัวที่ยังไม่เคยตั้งคงค่ากลางไว้
+		overrideBool(&autostart, p.AutoPlay)
+		overrideBool(&mute, p.MuteSound)
+		overrideBool(&continuePlay, p.ContinuePlay)
+		overrideBool(&continuePlayArk, p.ContinuePlayArk)
+		overrideBool(&loop, p.RepeatVideo)
+		overrideBool(&playbackRate, p.PlaybackRate)
+		overrideBool(&pip, p.PIP)
+		overrideBool(&displayTitle, p.DisplayTitle)
+		overrideBool(&seekForward, p.FastForward)
+		overrideBool(&seekBackward, p.Rewind)
+		// 0 = ยังไม่เคยตั้งค่า (ไม่ใช่ "กรอ 0 วินาที") — ใช้ค่ากลางแทน
+		if p.SeekStep > 0 {
+			seekStep = p.SeekStep
+		}
+	}
+
+	pipIcon := "enabled"
+	if !pip {
+		pipIcon = "disabled"
+	}
+
+	title := ""
+	if displayTitle {
+		title = file.Name
 	}
 
 	adSlug := services.ResolveAdSlug(planType, domain, file.SpaceID)
@@ -339,20 +378,34 @@ func (h *Handler) resolveEmbed(r *http.Request, slug string) (*EmbedResolveResul
 	}
 
 	embedConfig := services.EmbedPlayerConfig{
-		Lang:      "auto",
-		Adverts:   adSlug,
-		BaseColor: baseColor,
-		Autostart: autostart,
-		Mute:      mute,
+		Title:   title,
+		Adverts: adSlug,
+		VdoID:   slug,
+		Node: services.EmbedNode{
+			Static:   advertHost,
+			Playlist: playlistHost,
+		},
+		Autostart:    autostart,
+		Mute:         mute,
+		PipIcon:      pipIcon,
+		BaseColor:    baseColor,
+		BgColor:      bgColor,
+		Cast:         settings.Cast,
+		Loop:         loop,
+		PlaybackRate: playbackRate,
+		Seek: services.EmbedSeek{
+			Seconds:   seekStep,
+			Indicator: settings.SeekIndicator,
+			Forward:   seekForward,
+			Backward:  seekBackward,
+		},
 		ContinuePlayBack: services.EmbedContinuePlayback{
 			Enable:     continuePlay,
 			Ark:        continuePlayArk,
 			AutoResume: false,
 			Countdown:  20,
 		},
-		Slug:        slug,
-		AdvertLocal: false,
-		Static:      advertHost,
+		Gtag: settings.Gtag,
 	}
 
 	return &EmbedResolveResult{

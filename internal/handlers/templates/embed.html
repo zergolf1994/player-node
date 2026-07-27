@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
@@ -6,13 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{.Title}}</title>
     <link rel="icon" href="/favicon.ico" />
-
     <link rel="preconnect" href="https://ssl.p.jwpcdn.com" crossorigin />
     <link rel="dns-prefetch" href="https://ssl.p.jwpcdn.com" />
-    <link rel="preconnect" href="https://cdn.fembed.co" crossorigin />
+    <link rel="preconnect" href="https://asset-cdn.vdohide.com" crossorigin />
 
-    <link rel="stylesheet" href="https://cdn.fembed.co/2.0/player.bundle.min.css" />
-    <script src="https://ssl.p.jwpcdn.com/player/v/8.46.2/jwplayer.js"></script>
+    <link rel="stylesheet" href="https://asset-cdn.vdohide.com/player.bundle.min.css" />
+    <script src="https://ssl.p.jwpcdn.com/player/v/8.49.5/jwplayer.js"></script>
+    <style>:root {--base-color: {{.BaseColor}};}</style>
 </head>
 
 <body>
@@ -25,11 +25,8 @@
     </div>
 
     <script>
-        window.playerConfig = {{.PlayerConfig}};
-        document.documentElement.style.setProperty("--base-color", window.playerConfig.baseColor || "#ff8800");
+        window.PLAYER_CONFIG = {{.PlayerConfig}};
     </script>
-
-    <script src="https://cdn.fembed.co/2.0/player.min.js"></script>
+    <script src="https://asset-cdn.vdohide.com/player.min.js"></script>
 </body>
-
 </html>

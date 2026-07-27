@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -12,7 +11,6 @@ import (
 
 	"player-node/internal/cache"
 	"player-node/internal/config"
-	"player-node/internal/core/logger"
 	"player-node/internal/db/database"
 	"player-node/internal/handlers"
 	"player-node/internal/middleware"
@@ -26,14 +24,10 @@ func main() {
 	config.Load()
 	log.Printf("🚀 Starting Player Node %s", version)
 
-	// ── Rotating file logger ──────────────────────────────────
-	logCloser, err := logger.Init(config.AppConfig.LogPath)
-	if err != nil {
-		log.Printf("⚠️ File logging disabled: %v", err)
-	} else {
-		defer logCloser.Close()
-		log.Printf("📝 Logging to: %s", config.AppConfig.LogPath)
-	}
+	// log ออก stdout อย่างเดียว ให้ systemd/journald เก็บและหมุนให้
+	// (journalctl -u player-node -f) — ของเดิมเขียนลงไฟล์อย่างเดียวผ่าน
+	// logger.Init ซึ่ง log.SetOutput ทับ stdout ทำให้ journal เห็นแค่บรรทัด
+	// ก่อนหน้านั้น และไฟล์ที่หมุนไว้ก็ไม่มีใครลบ
 
 	// ── Redis lookup cache (optional — ไม่มี REDIS_URL = ปิด) ────
 	cache.Init(config.AppConfig.RedisURL)
@@ -68,10 +62,7 @@ func main() {
 	mux.HandleFunc("/embed/", h.Embed)
 	mux.HandleFunc("/favicon.ico", handlers.Favicon)
 
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintf(w, `{"status":"ok","service":"player-node","version":"%s"}`, version)
-	})
+	mux.HandleFunc("/health", handlers.Health(version))
 
 	mux.HandleFunc("/", h.Home)
 

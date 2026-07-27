@@ -7,6 +7,11 @@ import (
 )
 
 // PlayerConfig holds video player configuration for a custom domain.
+//
+// ⚠ ทุก toggle เป็น *bool ไม่ใช่ bool — schema ฝั่งหลัก (custom-domain.model.ts)
+// ตั้ง default: false ทุกตัว ถ้าใช้ bool ธรรมดา doc ที่ยังไม่มีฟิลด์นั้นจะอ่านได้
+// false เหมือนกับ "ตั้งใจปิด" แยกกันไม่ออก → ฟีเจอร์หายเงียบๆ
+// nil = ไม่ได้ตั้ง ให้ไปใช้ค่ากลางจาก services.GetPlayerSettings()
 type PlayerConfig struct {
 	Skin            string  `bson:"skin" json:"skin"`
 	LogoImageURL    *string `bson:"logoImageUrl,omitempty" json:"logoImageUrl,omitempty"`
@@ -14,21 +19,21 @@ type PlayerConfig struct {
 	LogoPosition    *string `bson:"logoPosition,omitempty" json:"logoPosition,omitempty"`
 	PosterURL       *string `bson:"posterUrl,omitempty" json:"posterUrl,omitempty"`
 	BaseColor       string  `bson:"baseColor" json:"baseColor"`
-	DisplayTitle    bool    `bson:"displayTitle" json:"displayTitle"`
-	AutoPlay        bool    `bson:"autoPlay" json:"autoPlay"`
-	MuteSound       bool    `bson:"muteSound" json:"muteSound"`
-	RepeatVideo     bool    `bson:"repeatVideo" json:"repeatVideo"`
-	ContinuePlay    bool    `bson:"continuePlay" json:"continuePlay"`
-	ContinuePlayArk bool    `bson:"continuePlayArk" json:"continuePlayArk"`
-	Sharing         bool    `bson:"sharing" json:"sharing"`
-	Captions        bool    `bson:"captions" json:"captions"`
-	PlaybackRate    bool    `bson:"playbackRate" json:"playbackRate"`
-	Keyboard        bool    `bson:"keyboard" json:"keyboard"`
-	Download        bool    `bson:"download" json:"download"`
-	PIP             bool    `bson:"pip" json:"pip"`
-	ShowPreviewTime bool    `bson:"showPreviewTime" json:"showPreviewTime"`
-	FastForward     bool    `bson:"fastForward" json:"fastForward"`
-	Rewind          bool    `bson:"rewind" json:"rewind"`
+	DisplayTitle    *bool   `bson:"displayTitle,omitempty" json:"displayTitle,omitempty"`
+	AutoPlay        *bool   `bson:"autoPlay,omitempty" json:"autoPlay,omitempty"`
+	MuteSound       *bool   `bson:"muteSound,omitempty" json:"muteSound,omitempty"`
+	RepeatVideo     *bool   `bson:"repeatVideo,omitempty" json:"repeatVideo,omitempty"`
+	ContinuePlay    *bool   `bson:"continuePlay,omitempty" json:"continuePlay,omitempty"`
+	ContinuePlayArk *bool   `bson:"continuePlayArk,omitempty" json:"continuePlayArk,omitempty"`
+	Sharing         *bool   `bson:"sharing,omitempty" json:"sharing,omitempty"`
+	Captions        *bool   `bson:"captions,omitempty" json:"captions,omitempty"`
+	PlaybackRate    *bool   `bson:"playbackRate,omitempty" json:"playbackRate,omitempty"`
+	Keyboard        *bool   `bson:"keyboard,omitempty" json:"keyboard,omitempty"`
+	Download        *bool   `bson:"download,omitempty" json:"download,omitempty"`
+	PIP             *bool   `bson:"pip,omitempty" json:"pip,omitempty"`
+	ShowPreviewTime *bool   `bson:"showPreviewTime,omitempty" json:"showPreviewTime,omitempty"`
+	FastForward     *bool   `bson:"fastForward,omitempty" json:"fastForward,omitempty"`
+	Rewind          *bool   `bson:"rewind,omitempty" json:"rewind,omitempty"`
 	SeekStep        int     `bson:"seekStep" json:"seekStep"`
 }
 

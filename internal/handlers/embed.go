@@ -11,7 +11,10 @@ import (
 )
 
 type EmbedData struct {
-	Title        string
+	Title string
+	// BaseColor ฝังเป็น CSS variable ตั้งแต่ฝั่ง server — ถ้าไปตั้งด้วย JS
+	// หลังโหลด จะเห็นสีเริ่มต้นกระพริบก่อนเปลี่ยนเป็นสีของโดเมน
+	BaseColor    template.CSS
 	PlayerConfig template.JS
 }
 
@@ -57,6 +60,7 @@ func (h *Handler) Embed(w http.ResponseWriter, r *http.Request) {
 
 	data := EmbedData{
 		Title:        resolved.File.Name,
+		BaseColor:    template.CSS(resolved.EmbedConfig.BaseColor),
 		PlayerConfig: template.JS(configJSON),
 	}
 

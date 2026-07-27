@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <link rel="preconnect" href="https://ssl.p.jwpcdn.com" crossorigin />
+    <link rel="dns-prefetch" href="https://ssl.p.jwpcdn.com" />
+
+    <link rel="stylesheet" href="https://asset-cdn.vdohide.com/player.bundle.min.css">
+
+    <script src="https://ssl.p.jwpcdn.com/player/v/8.49.5/jwplayer.js"></script>
+    <style>
+        :root {
+            --base-color: #ff6b35;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="player">
+        <div class="load_player">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+                <path
+                    d="M120 186.667a66.667 66.667 0 010-133.333V40a80 80 0 1080 80h-13.333A66.846 66.846 0 01120 186.667z" />
+            </svg>
+        </div>
+    </div>
+    <script>
+        window.PLAYER_CONFIG = {
+            // title: "123456",
+            adverts: "hobby",
+            vdoId: "0N_e7Hg2-g3U0",
+            // duration: 7200,
+            node: {
+                static: "static.vdohls.com",
+                playlist: "vdohls.com",
+            },
+            autostart: false,
+            mute: false,
+            pipIcon: "enabled",
+            baseColor: "#ff6b35",
+            bgColor: "#000000",
+            cast: true,
+            loop: true,
+            seek: {
+                seconds: 30,
+                indicator: true,
+                forward: true,
+                backward: true
+            },
+            playbackRate: true,
+            continuePlayBack: {
+                enable: true,
+                ark: false,
+                autoResume: false,
+                countdown: 20,
+            },
+            gtag: "G-N8WE91Q200"
+        }
+    </script>
+    <script src="https://asset-cdn.vdohide.com/player.min.js"></script>
+
+</body>
+
+</html>
