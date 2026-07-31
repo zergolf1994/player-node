@@ -60,6 +60,7 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/embed/", h.Embed)
+	mux.HandleFunc("/e/p", h.TrackBeacon)
 	mux.HandleFunc("/favicon.ico", handlers.Favicon)
 
 	mux.HandleFunc("/health", handlers.Health(version))

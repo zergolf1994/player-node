@@ -82,6 +82,18 @@ func GetDomainStatic() string {
 	return normalizeDomainHost(config.AppConfig.DomainStatic)
 }
 
+// GetTrackAPI fetches the track_api setting — base URL ของ track-node
+// (เก็บ scheme ไว้ ตัดแค่ / ท้าย) ว่าง = ไม่ส่งต่อ heartbeat
+func GetTrackAPI() string {
+	return strings.TrimRight(strings.TrimSpace(getStringSetting("track_api")), "/")
+}
+
+// GetTrackAPIKey fetches the track_api_key setting — แนบเป็น X-Track-Key
+// ให้ track-node เชื่อ X-Viewer-* headers ที่ forward ไป
+func GetTrackAPIKey() string {
+	return strings.TrimSpace(getStringSetting("track_api_key"))
+}
+
 // normalizeDomainHost strips scheme/trailing slash from a host setting value.
 func normalizeDomainHost(host string) string {
 	host = strings.TrimSpace(host)
