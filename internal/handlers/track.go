@@ -57,20 +57,23 @@ func (h *Handler) TrackBeacon(w http.ResponseWriter, r *http.Request) {
 
 	country := r.Header.Get("CF-IPCountry")
 	ua := r.Header.Get("User-Agent")
+	// โดเมน player ที่ heartbeat นี้วิ่งเข้ามา (custom domain ของ embed) —
+	// client ไม่ต้องส่งเอง เรารู้จาก Host ของ request อยู่แล้ว ปลอมยาก
+	embedHost := requestHost(r)
 	key := services.GetTrackAPIKey()
 
 	select {
 	case trackInflight <- struct{}{}:
 		go func() {
 			defer func() { <-trackInflight }()
-			forwardTrack(base, key, body, country, ua)
+			forwardTrack(base, key, body, country, ua, embedHost)
 		}()
 	default:
 		// คิวเต็ม (track-node ช้า/ล่ม) — ทิ้ง heartbeat นี้ไป รอบหน้ามาใน 10 วิ
 	}
 }
 
-func forwardTrack(base, key string, body []byte, country, ua string) {
+func forwardTrack(base, key string, body []byte, country, ua, embedHost string) {
 	req, err := http.NewRequest(http.MethodPost, base+"/e/p", bytes.NewReader(body))
 	if err != nil {
 		return
@@ -84,6 +87,9 @@ func forwardTrack(base, key string, body []byte, country, ua string) {
 	}
 	if ua != "" {
 		req.Header.Set("X-Viewer-UA", ua)
+	}
+	if embedHost != "" {
+		req.Header.Set("X-Embed-Host", embedHost)
 	}
 
 	resp, err := trackClient.Do(req)
