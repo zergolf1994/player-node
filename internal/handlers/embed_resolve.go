@@ -289,10 +289,13 @@ func (h *Handler) resolveEmbed(r *http.Request, slug string) (*EmbedResolveResul
 	playlistM3U8 := reqProto + "://" + playlistHost + "/" + slug + "/playlist.m3u8"
 
 	posterURL := lk.PosterURL
+	var image any = true
 	if posterURL == "" {
-		thumbTime := 0
+		thumbTime := 1
 		if file.Metadata != nil && file.Metadata.Duration != nil {
-			thumbTime = int(*file.Metadata.Duration / 2)
+			if midpoint := int(*file.Metadata.Duration / 2); midpoint > 1 {
+				thumbTime = midpoint
+			}
 		}
 		if staticHost != "" {
 			posterURL = reqProto + "://" + staticHost + "/thumb/" + slug + "/" + fmt.Sprintf("%d", thumbTime) + ".jpg"
@@ -340,6 +343,11 @@ func (h *Handler) resolveEmbed(r *http.Request, slug string) (*EmbedResolveResul
 
 	if domain != nil && domain.Player != nil {
 		p := domain.Player
+		if p.PosterURL != nil {
+			if customPosterURL := strings.TrimSpace(*p.PosterURL); customPosterURL != "" {
+				image = customPosterURL
+			}
+		}
 		if p.BaseColor != "" {
 			baseColor = p.BaseColor
 		}
@@ -385,6 +393,8 @@ func (h *Handler) resolveEmbed(r *http.Request, slug string) (*EmbedResolveResul
 			Static:   advertHost,
 			Playlist: playlistHost,
 		},
+		Sprite:       lk.SpriteExists,
+		Image:        image,
 		Autostart:    autostart,
 		Mute:         mute,
 		PipIcon:      pipIcon,

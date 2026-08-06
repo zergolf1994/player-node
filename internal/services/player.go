@@ -54,6 +54,8 @@ type EmbedPlayerConfig struct {
 	Adverts          string                `json:"adverts,omitempty"`
 	VdoID            string                `json:"vdoId"`
 	Node             EmbedNode             `json:"node"`
+	Sprite           bool                  `json:"sprite,omitempty"`
+	Image            any                   `json:"image,omitempty"`
 	Autostart        bool                  `json:"autostart"`
 	Mute             bool                  `json:"mute"`
 	PipIcon          string                `json:"pipIcon"`
