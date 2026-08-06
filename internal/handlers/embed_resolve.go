@@ -378,19 +378,19 @@ func (h *Handler) resolveEmbed(r *http.Request, slug string) (*EmbedResolveResul
 		title = file.Name
 	}
 
-	adSlug := services.ResolveAdSlug(planType, domain, file.SpaceID)
+	adverts := services.ResolveInlineAdverts(planType, domain, file.SpaceID)
 
-	advertHost := strings.Split(requestHost(r), ":")[0]
+	staticNodeHost := strings.Split(requestHost(r), ":")[0]
 	if staticHost != "" {
-		advertHost = staticHost
+		staticNodeHost = staticHost
 	}
 
 	embedConfig := services.EmbedPlayerConfig{
 		Title:   title,
-		Adverts: adSlug,
+		Adverts: adverts,
 		VdoID:   slug,
 		Node: services.EmbedNode{
-			Static:   advertHost,
+			Static:   staticNodeHost,
 			Playlist: playlistHost,
 		},
 		Sprite:       lk.SpriteExists,

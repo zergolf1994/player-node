@@ -91,8 +91,17 @@ func LoadDomains(domains []models.CustomDomain) {
 
 // FindDomainSlugBySpaceID returns the slug of the first enabled active domain in a space.
 func FindDomainSlugBySpaceID(spaceID string) string {
-	if spaceID == "" {
+	domain := FindDomainBySpaceID(spaceID)
+	if domain == nil {
 		return ""
+	}
+	return domain.Slug
+}
+
+// FindDomainBySpaceID returns the first enabled active domain for a workspace.
+func FindDomainBySpaceID(spaceID string) *models.CustomDomain {
+	if spaceID == "" {
+		return nil
 	}
 
 	domainCacheMu.RLock()
@@ -103,10 +112,10 @@ func FindDomainSlugBySpaceID(spaceID string) string {
 			continue
 		}
 		if d.SpaceID != nil && *d.SpaceID == spaceID {
-			return d.Slug
+			return d
 		}
 	}
-	return ""
+	return nil
 }
 
 // FindDomainBySlug looks up a domain by slug from the in-memory cache.
@@ -168,4 +177,3 @@ func GetSpacePlan(spaceID string) *models.WorkspacePlan {
 	}
 	return space.Plan
 }
-

@@ -1,6 +1,10 @@
 package services
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"player-node/internal/db/models"
+)
 
 // PlayerSettings holds global default player options used when no domain override exists.
 type PlayerSettings struct {
@@ -32,7 +36,7 @@ type EmbedContinuePlayback struct {
 
 // EmbedNode คือโดเมนปลายทางที่ player ใช้ประกอบ URL เอง
 //
-//	static   → advert feed + sprite/thumb
+//	static   → sprite/thumb
 //	playlist → //{playlist}/{vdoId}/playlist.m3u8
 type EmbedNode struct {
 	Static   string `json:"static,omitempty"`
@@ -51,7 +55,7 @@ type EmbedSeek struct {
 // (bundle อยู่ที่ asset-cdn.vdohide.com)
 type EmbedPlayerConfig struct {
 	Title            string                `json:"title,omitempty"`
-	Adverts          string                `json:"adverts,omitempty"`
+	Adverts          *models.DomainAdverts `json:"adverts,omitempty"`
 	VdoID            string                `json:"vdoId"`
 	Node             EmbedNode             `json:"node"`
 	Sprite           bool                  `json:"sprite,omitempty"`
